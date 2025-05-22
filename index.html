@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPDS Questionnaire | nathan MHC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .nathan-primary { color: #005A70; }
+        .nathan-primary-bg { background-color: #005A70; }
+        .nathan-secondary { color: #495057; }
+        .nathan-light-bg { background-color: #eef2f5; }
+        .critical-warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffeeba;
+            color: #856404;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.375rem;
+        }
+        .critical-emergency {
+            background-color: #f8d7da;
+            border-left: 4px solid #f5c6cb;
+            color: #721c24;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            border-radius: 0.375rem;
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            font-size: 1rem;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #005A70;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 90, 112, 0.25);
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .radio-label:hover {
+            background-color: #f0f5f7;
+        }
+        .radio-label input[type="radio"] {
+            margin-right: 0.75rem;
+            accent-color: #005A70;
+        }
+        .btn-primary, .btn-lang {
+            background-color: #005A70;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover:not(:disabled), .btn-lang:hover:not(:disabled) {
+            background-color: #004354;
+        }
+        .btn-primary:disabled, .btn-lang:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .btn-lang.active {
+            background-color: #003f4f;
+            box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06);
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        /* Removed bilingual-text class styling as text will be handled by i18n */
+        .radio-option-selected {
+            background-color: #e0f0f3;
+            border-color: #005A70;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #005A70;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .gemini-content {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #eef2f5;
+            border-radius: 0.375rem;
+            border: 1px solid #d1dce5;
+        }
+        .gemini-content h4 {
+            font-weight: 600;
+            color: #005A70;
+            margin-bottom: 0.5rem;
+        }
+        .gemini-content p {
+            white-space: pre-wrap;
+        }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="nathan-secondary">
+    <div id="app" v-cloak>
+        <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+            <header class="text-center mb-8 relative">
+                <div class="absolute top-0 right-0 mt-2 mr-2 md:mt-0 md:mr-0">
+                    <button @click="setLanguage('en')" class="btn-lang text-sm px-3 py-1 mr-1" :class="{ 'active': currentLanguage === 'en' }">English</button>
+                    <button @click="setLanguage('zh')" class="btn-lang text-sm px-3 py-1" :class="{ 'active': currentLanguage === 'zh' }">中文</button>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold nathan-primary">{{ t('appTitleShort') }}</h1>
+                <h2 class="text-2xl md:text-3xl font-semibold nathan-primary mt-2">{{ t('epdsTitle') }}</h2>
+            </header>
+
+            <section class="mb-8 p-6 bg-white shadow-lg rounded-lg">
+                <p>{{ t('intro.line1_pt1') }} <strong>{{ t('intro.past7Days') }}</strong> {{ t('intro.line1_pt2') }}</p>
+                
+                <div class="critical-warning mt-6">
+                    <p><strong>{{ t('importantWarning.title') }}</strong> {{ t('importantWarning.text') }}</p>
+                </div>
+                <div class="critical-emergency">
+                    <p><strong>{{ t('urgentWarning.title') }}</strong> {{ t('urgentWarning.text') }}</p>
+                </div>
+            </section>
+
+            <section class="mb-8 p-6 bg-white shadow-lg rounded-lg">
+                <h3 class="text-xl font-semibold nathan-primary mb-4">{{ t('additionalResources.title') }}</h3>
+                <div class="grid md:grid-cols-2 gap-4 text-center">
+                    <div>
+                        <p class="mb-2">{{ t('additionalResources.drPan') }}</p>
+                        <img src="https://placehold.co/150x150/005A70/FFFFFF?text=QR+Dr.Pan" alt="QR Code for Dr. Pan's audio file" class="mx-auto rounded-md" onerror="this.src='https://placehold.co/150x150/cccccc/FFFFFF?text=Error+Loading+QR';">
+                    </div>
+                    <div>
+                        <p class="mb-2">{{ t('additionalResources.drLiao') }}</p>
+                        <img src="https://placehold.co/150x150/005A70/FFFFFF?text=QR+Dr.Liao" alt="QR Code for Dr. Liao's video" class="mx-auto rounded-md" onerror="this.src='https://placehold.co/150x150/cccccc/FFFFFF?text=Error+Loading+QR';">
+                    </div>
+                </div>
+            </section>
+
+            <form @submit.prevent="handleSubmit">
+                <section class="mb-8 p-6 bg-white shadow-lg rounded-lg">
+                    <h3 class="text-xl font-semibold nathan-primary mb-6">{{ t('personalData.title') }}</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="age" class="form-label">{{ t('personalData.age') }}:</label>
+                            <input type="number" id="age" v-model.number="personalData.age" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="mentalProblemHistory" class="form-label">{{ t('personalData.mentalHistory') }}</label>
+                            <select id="mentalProblemHistory" v-model="personalData.mentalProblemHistory" class="form-select" required>
+                                <option value="">{{ t('personalData.select') }}</option>
+                                <option value="yes">{{ t('personalData.yes') }}</option>
+                                <option value="no">{{ t('personalData.no') }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="previousPregnancies" class="form-label">{{ t('personalData.prevPregnancies') }}:</label>
+                            <input type="number" id="previousPregnancies" v-model.number="personalData.previousPregnancies" class="form-input" min="0" required>
+                        </div>
+                        <div>
+                            <label for="deliveryDate" class="form-label">{{ t('personalData.deliveryDate') }} ({{t('personalData.dateFormat')}}):</label>
+                            <input type="text" id="deliveryDate" v-model="personalData.deliveryDate" :placeholder="t('personalData.dateFormat')" class="form-input" required pattern="\d{2}/\d{2}/\d{4}" @blur="validateDeliveryDate">
+                             <small class="text-xs text-gray-500">{{ t('personalData.dateFormatHelp') }}</small>
+                             <p v-if="deliveryDateError" class="text-red-500 text-xs mt-1">{{ deliveryDateError }}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-8 p-6 bg-white shadow-lg rounded-lg">
+                    <h3 class="text-xl font-semibold nathan-primary mb-4">{{ t('questionnaire.title') }}</h3>
+                    <p class="mb-2">{{ t('questionnaire.exampleIntro') }} -</p>
+                    <p class="mb-1">{{ t('questionnaire.exampleQuestion') }}: "{{ t('questions.q_example.text') }}"</p>
+                    <div class="p-3 mb-6 border border-gray-300 rounded-md bg-gray-50">
+                        <ul class="list-none">
+                            <li>{{ t('questions.q_example.opt0') }} (0)</li>
+                            <li class="font-bold text-green-600">{{ t('questions.q_example.opt1') }} √ (1)</li>
+                            <li>{{ t('questions.q_example.opt2') }} (2)</li>
+                            <li>{{ t('questions.q_example.opt3') }} (3)</li>
+                        </ul>
+                        <p class="mt-2">{{ t('questionnaire.exampleExplanation') }}</p>
+                    </div>
+
+                    <p class="font-semibold text-lg mb-6">{{ t('questionnaire.instruction') }}</p>
+
+                    <div v-for="(question, index) in questions" :key="question.id" class="question-card">
+                        <p class="font-semibold mb-3 text-lg">
+                            {{ index + 1 }}. {{ t(question.textKey) }}
+                        </p>
+                        <div class="space-y-2">
+                            <label v-for="option in question.options" :key="option.value" 
+                                   class="radio-label"
+                                   :class="{ 'radio-option-selected': answers[question.id] === option.value }">
+                                <input type="radio" :name="question.id" :value="option.value" v-model.number="answers[question.id]" required @change="handleQ10Change(question.id, option.value)">
+                                <span class="ml-2">
+                                    {{ t(option.textKey) }} ({{ option.value }})
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div v-if="showQ10Warning" class="critical-warning mt-4">
+                        <p><strong>{{ t('q10Warning.title') }}</strong> {{ t('q10Warning.text') }}</p>
+                    </div>
+                </section>
+
+                <div class="text-center">
+                    <button type="submit" class="btn-primary text-lg px-8 py-3">
+                        {{ t('buttons.submitScore') }}
+                    </button>
+                </div>
+            </form>
+
+            <div v-if="showResultsModal" class="modal">
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold nathan-primary mb-4">{{ t('resultsModal.title') }}</h2>
+                    <div class="text-4xl font-bold text-center my-6">{{ totalScore }} / 30</div>
+                    <div class="mb-6" v-html="scoreInterpretationHTML"></div>
+                    
+                    <div v-if="item10SpecificWarning" class="critical-emergency my-4">
+                         <p><strong>{{ t('resultsModal.item10WarningTitle') }}</strong> {{ t('resultsModal.item10WarningText') }}</p>
+                    </div>
+
+                    <div v-if="showGeminiFeature" id="geminiFeatureSection">
+                        <hr class="my-6">
+                        <button @click="getGentleTips" :disabled="geminiLoading" class="btn-primary w-full mb-2">
+                           ✨ {{ t('buttons.getGentleTips') }}
+                        </button>
+                        <div v-if="geminiLoading" class="loader"></div>
+                        <div v-if="geminiResultText" class="gemini-content">
+                            <h4>{{ t('gemini.title') }}</h4>
+                            <p>{{ geminiResultText }}</p> <p class="text-xs mt-3">
+                                <strong>{{ t('gemini.disclaimerTitle') }}</strong> {{ t('gemini.disclaimerText') }}
+                            </p>
+                        </div>
+                         <p v-if="geminiError" class="text-red-500 text-sm mt-2">{{ geminiError }}</p>
+                    </div>
+                    
+                    <div id="bookingSection">
+                        <hr class="my-6">
+                        <h3 class="text-lg font-semibold mb-3">{{ t('booking.title') }}</h3>
+                        <div class="mb-4">
+                            <label for="bookingLocation" class="form-label">{{ t('booking.selectLocation') }}:</label>
+                            <select id="bookingLocation" v-model="bookingData.location" class="form-select">
+                                <option value="">{{ t('booking.noThanks') }}</option>
+                                <option value="CN">{{ t('booking.locations.cn') }}</option>
+                                <option value="HV">{{ t('booking.locations.hv') }}</option>
+                                <option value="TH">{{ t('booking.locations.th') }}</option>
+                                <option value="Dr. Pan">{{ t('booking.locations.drPan') }}</option>
+                                <option value="Dr. Liao">{{ t('booking.locations.drLiao') }}</option>
+                            </select>
+                        </div>
+                        <button @click="confirmBooking" class="btn-primary w-full mb-2">{{ t('buttons.confirmFinish') }}</button>
+                    </div>
+                    <div v-if="generalLoading" class="loader"></div>
+                </div>
+            </div>
+
+            <div v-if="showThankYouModal" class="modal">
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold nathan-primary mb-4">{{ t('thankYouModal.title') }}</h2>
+                    <div class="mb-6" v-html="thankYouMessageHTML"></div>
+                    <div class="mt-4 p-4 nathan-light-bg rounded-md">
+                        <h4 class="font-semibold mb-2">{{ t('contactInfo.title') }}:</h4>
+                        <p><strong>{{ t('contactInfo.cn.name') }}:</strong> {{ t('contactInfo.cn.details') }}</p>
+                        <p><strong>{{ t('contactInfo.hv.name') }}:</strong> {{ t('contactInfo.hv.details') }}</p>
+                        <p><strong>{{ t('contactInfo.th.name') }}:</strong> {{ t('contactInfo.th.details') }}</p>
+                        <p class="mt-2"><em>{{ t('contactInfo.note') }}</em></p>
+                    </div>
+                     <div class="critical-emergency mt-6">
+                        <p><strong>{{ t('urgentWarning.titleReminder') }}</strong> {{ t('urgentWarning.text') }}</p>
+                    </div>
+                    <button @click="closeThankYouModal" class="btn-primary w-full mt-6">{{ t('buttons.close') }}</button>
+                </div>
+            </div>
+             <div v-if="authError" class="critical-emergency p-4 text-center fixed top-0 left-0 w-full z-50">
+                {{ authError }}
+            </div>
+
+            <footer class="text-center mt-12 py-6 border-t border-gray-300">
+                <p class="text-sm text-gray-500">
+                   {{ t('footer.references') }}
+                </p>
+                 <p v-if="currentUserId" class="text-xs text-gray-400 mt-2">{{ t('footer.userId') }}: {{ currentUserId }}</p>
+                 <p v-else-if="!authError" class="text-xs text-gray-400 mt-2">{{ t('footer.initializingUser') }}</p>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        const { createApp, ref, reactive, onMounted, computed } = Vue;
+
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- i18n Messages ---
+        // In a real app, these would be in separate en.json and zh.json files
+        const enMessages = {
+            appTitleShort: "nathan MHC",
+            epdsTitle: "Edinburgh Postnatal Depression Scale (EPDS)",
+            intro: {
+                line1_pt1: "Edinburgh Postnatal Depression Scale is a reliable & effective screening tool to assess new mothers emotional adjustment after delivery. Since you are either pregnant or have recently had a baby, we want to know how you feel. Please select the answer that comes closest to how you have been feeling",
+                past7Days: "IN THE PAST 7 DAYS",
+                line1_pt2: "—not just how you feel today. Complete all 10 items and find your score after submission of the form. Most mothers can easily complete the scale in less than five minutes."
+            },
+            importantWarning: {
+                title: "Important:",
+                text: "EPDS is a screening test, not a medical diagnosis tool. A careful clinical evaluation by a health care professional is needed to confirm a diagnosis and establish a treatment plan. The scale indicates how the mother felt during the previous week, and it may be useful to repeat the scale after two weeks. If something doesn’t seem right, call our centre or your health care provider regardless of your score."
+            },
+            urgentWarning: {
+                title: "URGENT:",
+                text: "If you have had ANY thoughts of harming yourself or your baby, or you are having hallucinations, please GO TO YOUR NEAREST HOSPITAL AUTHORITY HOSPITAL EMERGENCY ROOM IMMEDIATELY.",
+                titleReminder: "REMINDER - URGENT:"
+            },
+            additionalResources: {
+                title: "Additional Resources",
+                drPan: "Dr. Pan 2024 October metroradio audio file",
+                drLiao: "Dr. Liao video on EPDS"
+            },
+            personalData: {
+                title: "Personal Data",
+                age: "Age",
+                mentalHistory: "Do you have a history of depression or other mental problem?",
+                select: "Select",
+                yes: "Yes",
+                no: "No",
+                prevPregnancies: "Number of pregnancies before",
+                deliveryDate: "Date of delivery this time",
+                dateFormat: "DD/MM/YYYY",
+                dateFormatHelp: "Please use DD/MM/YYYY format.",
+                dateFormatError: "Please use DD/MM/YYYY format.",
+                dateInvalidError: "Invalid date."
+            },
+            questionnaire: {
+                title: "EPDS Questionnaire",
+                exampleIntro: "Below is an example",
+                exampleQuestion: "Question",
+                exampleExplanation: "This would mean: “I have felt happy most of the time” in the past week. Please complete the other questions in the same way.",
+                instruction: "In the Past 7 days (including today),"
+            },
+            q10Warning: {
+                title: "Regarding your answer to question 10:",
+                text: "Please contact your health care provider immediately regardless of your final score. Your well-being is very important."
+            },
+            buttons: {
+                submitScore: "Submit & See Score",
+                getGentleTips: "Get Gentle Encouragement & Tips",
+                confirmFinish: "Confirm Choice & Finish",
+                close: "Close"
+            },
+            resultsModal: {
+                title: "Your EPDS Score",
+                item10WarningTitle: "VERY IMPORTANT (Item 10):",
+                item10WarningText: "Because of your answer to the question about thoughts of self-harm, it is crucial that you seek further evaluation as soon as possible to ensure your safety and the safety of your baby. Please contact your healthcare provider or go to the nearest emergency room."
+            },
+            gemini: {
+                title: "Gentle Encouragement & Tips",
+                disclaimerTitle: "Disclaimer:",
+                disclaimerText: "This information is AI-generated and for general informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition."
+            },
+            booking: {
+                title: "Would you like to send a booking request to MHC?",
+                selectLocation: "Select Doctor/Location",
+                noThanks: "No, thank you",
+                locations: {
+                    cn: "CN / Central",
+                    hv: "HV / Happy Valley",
+                    th: "TH / Tai Koo",
+                    drPan: "Dr. Pan",
+                    drLiao: "Dr. Liao"
+                }
+            },
+            thankYouModal: {
+                title: "Thank You",
+                bookingMade: "Thank you. Your EPDS score has been recorded. A booking request for <strong>{location}</strong> has been noted. Our team will be in touch if further action is required based on your results and request.<br><br>Routing for request: {routing}",
+                bookingNotMade: "Thank you. Your EPDS score has been recorded. Remember, the EPDS indicates how you felt during the previous week, and it may be useful to repeat the scale after two weeks. If something doesn’t seem right, call our centre or your health care provider regardless of your score."
+            },
+            contactInfo: {
+                title: "Contact Information",
+                cn: { name: "Central (CN)", details: "Address_CN, Tel_CN, Fax_CN, Email_CN, WhatsApp_CN" },
+                hv: { name: "Happy Valley (HV)", details: "Address_HV, Tel_HV, Fax_HV, Email_HV, WhatsApp_HV" },
+                th: { name: "Tai Koo (TH)", details: "Address_TH, Tel_TH, Fax_TH, Email_TH, WhatsApp_TH" },
+                note: "(Note: Please replace Address_XX, Tel_XX etc. with actual contact details)"
+            },
+            footer: {
+                references: "References: Cox, J.L., Holden, J.M. and Sagovsky, R. (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry, 150, 782-786. Full list of references available upon request.",
+                userId: "User ID",
+                initializingUser: "Initializing user..."
+            },
+            scoreInterpretation: {
+                low: "Scores in this range may indicate the presence of some symptoms of distress that may be short-lived and are less likely to interfere with day to day ability to function at home or at work. However if these symptoms have persisted more than a week or two further enquiry is warranted.",
+                medium: "Scores within this range indicate presence of symptoms of distress that may be discomforting. Repeat the EPDS in 2 weeks’ time and continue monitoring progress regularly. If the scores increase to above 12 assess further and consider referral as needed.",
+                high: "Scores above 12 require further assessment and appropriate management as the likelihood of depression is high. Referral to a psychiatrist/psychologist may be necessary."
+            },
+            // Question Keys
+            questions: {
+                q_example: { text: "I have felt happy", opt0: "Yes, all of the time", opt1: "Yes, most of the time", opt2: "No, not very often", opt3: "No, not at all" },
+                q1: { text: "I have been able to laugh and see the funny side of things", opt0: "As much as I always have", opt1: "Not quite so much now", opt2: "Definitely not so much now", opt3: "Not at all" },
+                q2: { text: "I have looked forward with enjoyment to things", opt0: "As much as I always have", opt1: "Not quite so much now", opt2: "Definitely not so much now", opt3: "Not at all" },
+                q3: { text: "I have blamed myself unnecessarily when things went wrong", opt0: "No, never", opt1: "Not very often", opt2: "Yes, some of the time", opt3: "Yes, most of the time" },
+                q4: { text: "I have felt anxious or worried for no very good reason", opt0: "No, not at all", opt1: "Hardly ever", opt2: "Yes, sometimes", opt3: "Yes, very often" },
+                q5: { text: "I have felt scared or panicky for no very good reason", opt0: "No, not at all", opt1: "No, not much", opt2: "Yes, sometimes", opt3: "Yes, quite a lot" },
+                q6: { text: "Things have been getting on top of me / When things were getting on top of me", opt0: "I have been coping as well as ever", opt1: "Most of the time I have coped quite well", opt2: "Sometimes I was not coping as well as before", opt3: "Most of the time I was not able to cope at all" },
+                q7: { text: "I have been so unhappy that I have had difficulty sleeping", opt0: "No, not at all", opt1: "Not very often", opt2: "Yes, sometimes", opt3: "Yes, most of the time" },
+                q8: { text: "I have felt sad or miserable", opt0: "No, not at all", opt1: "Not very often", opt2: "Yes, sometimes", opt3: "Yes, most of the time" },
+                q9: { text: "I have been so unhappy that I have been crying", opt0: "No, never", opt1: "Only occasionally", opt2: "Yes, sometimes", opt3: "Yes, most of the time" },
+                q10: { text: "I have thought of harming myself", opt0: "Never", opt1: "Hardly ever", opt2: "Sometimes", opt3: "Yes, quite often" }
+            },
+            geminiErrors: {
+                fetchError: "Error fetching tips: {error}. Please try again later.",
+                unexpectedResponse: "Sorry, couldn't retrieve tips at this moment. Please try again later."
+            },
+            formErrors: {
+                authInitError: "Authentication is still initializing or failed. Please wait or refresh.",
+                generalFormError: "Please correct the errors in the form."
+            }
+        };
+
+        const zhMessages = {
+            appTitleShort: "養和醫療",
+            epdsTitle: "愛丁堡產後抑鬱量表",
+            intro: {
+                line1_pt1: "愛丁堡產後憂鬱量表是一個可靠且有效的篩查工具，用於評估新任媽媽在分娩後的情緒調整。由於您正處於懷孕階段或最近剛生完寶寶，我們希望了解您的感受。請於選擇答案時提供不僅僅是您今天的感受，而是最接近您在",
+                past7Days: "過去7天內",
+                line1_pt2: "的感受的答案。完成所有10項問題及提交表格後，系統會為您計出得分結果。大多數媽媽可以在五分鐘內輕鬆完成此量表。"
+            },
+            importantWarning: {
+                title: "重要提示：",
+                text: "EPDS是一種篩查測試，而不是醫療診斷工具。詳細的臨床評估需要由醫療專業人員進行，以確認診斷並制定治療計劃。此量表顯示媽媽在過去一周的感受，兩周後重複使用此量表可能亦會有所幫助。如果您感覺有任何不妥，無論您的得分如何，都請聯絡我們的中心或您的醫生。"
+            },
+            urgentWarning: {
+                title: "緊急情況：",
+                text: "如果您有任何傷害自己或寶寶的念頭，或出現幻覺，請立即前往最就近的醫管局屬下醫院急診室。",
+                titleReminder: "緊急提醒："
+            },
+            additionalResources: {
+                title: "額外資源",
+                drPan: "潘醫生2024年10月新城電台聲頻檔案",
+                drLiao: "廖醫生有關EPDS的影片"
+            },
+            personalData: {
+                title: "個人資料",
+                age: "年齡",
+                mentalHistory: "您是否有抑鬱症或其他心理問題的病史？",
+                select: "請選擇",
+                yes: "是",
+                no: "否",
+                prevPregnancies: "之前的妊娠次數",
+                deliveryDate: "本次分娩日期",
+                dateFormat: "日/月/年",
+                dateFormatHelp: "請使用 日/月/年 格式。",
+                dateFormatError: "請使用 日/月/年 格式。",
+                dateInvalidError: "日期無效。"
+            },
+            questionnaire: {
+                title: "愛丁堡產後抑鬱量表",
+                exampleIntro: "以下為作答提示",
+                exampleQuestion: "問題",
+                exampleExplanation: "以上選擇答案表明在過去7天你大部分時間都感到愉快。請照同樣方法完成以下各題。",
+                instruction: "在過去7天內 (包括今天),"
+            },
+            q10Warning: {
+                title: "關於您對第10條問題的回答：",
+                text: "請不論總分如何，盡快聯絡您的醫生。您的健康非常重要。"
+            },
+            buttons: {
+                submitScore: "提交並查看分數",
+                getGentleTips: "獲取溫馨鼓勵與提示",
+                confirmFinish: "確認選擇並完成",
+                close: "關閉"
+            },
+            resultsModal: {
+                title: "您的EPDS分數",
+                item10WarningTitle: "非常重要（第10項）：",
+                item10WarningText: "由於您對有關自我傷害想法問題的回答，請您盡快接受進一步評估，以確保您自己和寶寶的安全。請聯絡您的醫療服務提供者或前往最近的急症室。"
+            },
+            gemini: {
+                title: "溫馨鼓勵与提示",
+                disclaimerTitle: "免責聲明：",
+                disclaimerText: "此資訊由人工智能生成，僅供一般參考之用。它不能替代專業的醫療建議、診斷或治療。如果您對醫療狀況有任何疑問，請務必諮詢您的醫生或其他合格醫療服務提供者的意見。"
+            },
+            booking: {
+                title: "您想向MHC發送預約請求嗎？",
+                selectLocation: "選擇醫生/地點",
+                noThanks: "不，謝謝",
+                locations: {
+                    cn: "中環",
+                    hv: "跑馬地",
+                    th: "太古",
+                    drPan: "潘醫生",
+                    drLiao: "廖醫生"
+                }
+            },
+            thankYouModal: {
+                title: "謝謝您",
+                bookingMade: "謝謝您。您的EPDS分數已被記錄。有關<strong>{location}</strong>的預約請求已被記錄。如果根據您的結果和請求需要進一步行動，我們的團隊將與您聯繫。<br><br>請求將轉介至：{routing}",
+                bookingNotMade: "謝謝您。您的EPDS分數已被記錄。請記住，此EPDS量表顯示媽媽在過去一周的感受，兩周後重複使用此量表可能會有所幫助。如果您感覺有任何不妥，無論您的得分如何，都請聯絡我們的中心或您的醫生。"
+            },
+            contactInfo: {
+                title: "聯絡方式",
+                cn: { name: "中環 (CN)", details: "中環地址, 中環電話, 中環傳真, 中環電郵, 中環WhatsApp" },
+                hv: { name: "跑馬地 (HV)", details: "跑馬地地址, 跑馬地電話, 跑馬地傳真, 跑馬地電郵, 跑馬地WhatsApp" },
+                th: { name: "太古 (TH)", details: "太古地址, 太古電話, 太古傳真, 太古電郵, 太古WhatsApp" },
+                note: "（註：請將地址_XX, 電話_XX等替換為實際聯絡方式）"
+            },
+            footer: {
+                references: "參考文獻：Cox, J.L., Holden, J.M. and Sagovsky, R. (1987)。產後抑鬱症的檢測：10項愛丁堡產後抑鬱量表的發展。《英國精神醫學雜誌》，150，782-786。完整的參考文獻列表可應要求提供。",
+                userId: "用戶ID",
+                initializingUser: "正在初始化用戶..."
+            },
+            scoreInterpretation: {
+                low: "得分 0-9 ：這個範圍的得分可能表示存在一些短暫的困擾症狀，並且不太可能影響在家或工作時的日常功能。然而，如果這些症狀持續超過一到兩週，則需要進一步尋求協助。",
+                medium: "得分10-12：這個範圍的得分表示存在可能令人不適的困擾症狀。請在兩週後重複進行EPDS，並定期監測進展。如果得分上升到12以上，則需要進一步評估並考慮轉介專業人士。",
+                high: "得分≥13：因為抑鬱症的可能性較高，得分超過12需要進一步評估和適切管理。可能需要轉介精神科醫生或心理學家。"
+            },
+            questions: { // Note: Values for options are universal, text keys are translated
+                q_example: { text: "我感到愉快", opt0: "所有時候這樣", opt1: "大部分時候這樣", opt2: "不經常這樣", opt3: "一點也沒有" },
+                q1: { text: "我能看到事情有趣的一面，並笑得開心", opt0: "同以前一樣", opt1: "沒有以前那麼多", opt2: "肯定比以前少", opt3: "完全不能" },
+                q2: { text: "我欣然期待未來的一切", opt0: "同以前一樣", opt1: "沒有以前那麼多", opt2: "肯定比以前少", opt3: "完全不能" },
+                q3: { text: "當事情出錯時，我會不必要地責備自己", opt0: "沒有這樣", opt1: "不經常這樣", opt2: "有時候這樣", opt3: "大部分時候這樣" },
+                q4: { text: "我無缘無故感到焦慮和擔心", opt0: "一點也沒有", opt1: "極少有", opt2: "有時候這樣", opt3: "經常這樣" },
+                q5: { text: "我無缘無故感到害怕和驚慌", opt0: "一點也沒有", opt1: "不經常這樣", opt2: "有時候這樣", opt3: "相當多時候這樣" },
+                q6: { text: "很多事情衝着我而來，使我透不過氣", opt0: "一直都能應付得很好", opt1: "大部分時候我可以應付自如", opt2: "有時候我不能像平時那樣應付得好", opt3: "大多數時候我都不能應付" },
+                q7: { text: "我很不開心，以致失眠", opt0: "沒有這樣", opt1: "不經常這樣", opt2: "有時候這樣", opt3: "大部分時候這樣" },
+                q8: { text: "我感到難過和悲傷", opt0: "沒有這樣", opt1: "不經常這樣", opt2: "有時候這樣", opt3: "大部分時候這樣" },
+                q9: { text: "我不開心到哭", opt0: "沒有這樣", opt1: "只是間中這樣", opt2: "有時候這樣", opt3: "大部分時候這樣" },
+                q10: { text: "我想過要傷害自己", opt0: "從來沒有", opt1: "很少這樣", opt2: "有時候這樣", opt3: "頗經常這樣" }
+            },
+             geminiErrors: {
+                fetchError: "獲取提示時出錯：{error}。請稍後再試。",
+                unexpectedResponse: "抱歉，暫時無法獲取提示。請稍後再試。"
+            },
+            formErrors: {
+                authInitError: "認證仍在初始化或失敗。請稍候或刷新頁面。",
+                generalFormError: "請修正表格中的錯誤。"
+            }
+        };
+
+        const App = {
+            setup() {
+                // i18n
+                const currentLanguage = ref(localStorage.getItem('epdsLang') || 'en');
+                const availableMessages = {
+                    en: enMessages,
+                    zh: zhMessages
+                };
+                const messages = computed(() => availableMessages[currentLanguage.value] || enMessages);
+
+                const t = (key, namedArgs = {}) => {
+                    let translation = key.split('.').reduce((o, i) => {
+                        if (o && typeof o === 'object' && i in o) return o[i];
+                        return null; // Key not found
+                    }, messages.value);
+
+                    if (translation === null) {
+                        console.warn(`Translation key "${key}" not found for language "${currentLanguage.value}".`);
+                        return key; // Return the key itself if not found
+                    }
+
+                    // Simple interpolation for named arguments like {location}
+                    if (typeof translation === 'string' && Object.keys(namedArgs).length > 0) {
+                        Object.keys(namedArgs).forEach(argKey => {
+                            translation = translation.replace(new RegExp(`{${argKey}}`, 'g'), namedArgs[argKey]);
+                        });
+                    }
+                    return translation;
+                };
+
+                const setLanguage = (lang) => {
+                    currentLanguage.value = lang;
+                    localStorage.setItem('epdsLang', lang);
+                };
+
+
+                // Firebase State
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-epds-vue-app';
+                let fbApp;
+                let fbAuth;
+                let fbDb;
+                const currentUserId = ref(null);
+                const authError = ref('');
+
+                // Form State
+                const personalData = reactive({
+                    age: null,
+                    mentalProblemHistory: '',
+                    previousPregnancies: null,
+                    deliveryDate: ''
+                });
+                const deliveryDateError = ref('');
+                const answers = reactive({}); 
+                
+                const questionsDefinition = [
+                     { id: "q1", textKey: "questions.q1.text", options: [ { textKey: "questions.q1.opt0", value: 0 }, { textKey: "questions.q1.opt1", value: 1 }, { textKey: "questions.q1.opt2", value: 2 }, { textKey: "questions.q1.opt3", value: 3 } ] },
+                     { id: "q2", textKey: "questions.q2.text", options: [ { textKey: "questions.q2.opt0", value: 0 }, { textKey: "questions.q2.opt1", value: 1 }, { textKey: "questions.q2.opt2", value: 2 }, { textKey: "questions.q2.opt3", value: 3 } ] },
+                     { id: "q3", textKey: "questions.q3.text", options: [ { textKey: "questions.q3.opt0", value: 0 }, { textKey: "questions.q3.opt1", value: 1 }, { textKey: "questions.q3.opt2", value: 2 }, { textKey: "questions.q3.opt3", value: 3 } ] },
+                     { id: "q4", textKey: "questions.q4.text", options: [ { textKey: "questions.q4.opt0", value: 0 }, { textKey: "questions.q4.opt1", value: 1 }, { textKey: "questions.q4.opt2", value: 2 }, { textKey: "questions.q4.opt3", value: 3 } ] },
+                     { id: "q5", textKey: "questions.q5.text", options: [ { textKey: "questions.q5.opt0", value: 0 }, { textKey: "questions.q5.opt1", value: 1 }, { textKey: "questions.q5.opt2", value: 2 }, { textKey: "questions.q5.opt3", value: 3 } ] },
+                     { id: "q6", textKey: "questions.q6.text", options: [ { textKey: "questions.q6.opt0", value: 0 }, { textKey: "questions.q6.opt1", value: 1 }, { textKey: "questions.q6.opt2", value: 2 }, { textKey: "questions.q6.opt3", value: 3 } ] },
+                     { id: "q7", textKey: "questions.q7.text", options: [ { textKey: "questions.q7.opt0", value: 0 }, { textKey: "questions.q7.opt1", value: 1 }, { textKey: "questions.q7.opt2", value: 2 }, { textKey: "questions.q7.opt3", value: 3 } ] },
+                     { id: "q8", textKey: "questions.q8.text", options: [ { textKey: "questions.q8.opt0", value: 0 }, { textKey: "questions.q8.opt1", value: 1 }, { textKey: "questions.q8.opt2", value: 2 }, { textKey: "questions.q8.opt3", value: 3 } ] },
+                     { id: "q9", textKey: "questions.q9.text", options: [ { textKey: "questions.q9.opt0", value: 0 }, { textKey: "questions.q9.opt1", value: 1 }, { textKey: "questions.q9.opt2", value: 2 }, { textKey: "questions.q9.opt3", value: 3 } ] },
+                     { id: "q10", textKey: "questions.q10.text", options: [ { textKey: "questions.q10.opt0", value: 0 }, { textKey: "questions.q10.opt1", value: 1 }, { textKey: "questions.q10.opt2", value: 2 }, { textKey: "questions.q10.opt3", value: 3 } ], isCritical: true }
+                ];
+                const questions = ref(questionsDefinition);
+
+                // UI State
+                const showQ10Warning = ref(false);
+                const showResultsModal = ref(false);
+                const showThankYouModal = ref(false);
+                const totalScore = ref(0);
+                const q10Score = ref(0);
+                const scoreInterpretationHTML = ref('');
+                const item10SpecificWarning = ref(false);
+                const thankYouMessageHTML = ref('');
+                const generalLoading = ref(false);
+
+                // Booking State
+                const bookingData = reactive({ location: '' });
+
+                // Gemini Feature State
+                const showGeminiFeature = ref(false);
+                const geminiLoading = ref(false);
+                const geminiResultText = ref('');
+                const geminiError = ref('');
+
+                onMounted(async () => {
+                    try {
+                        fbApp = initializeApp(firebaseConfig);
+                        fbAuth = getAuth(fbApp);
+                        fbDb = getFirestore(fbApp);
+                        setLogLevel('debug');
+                        console.log("Firebase initialized successfully (Vue).");
+
+                        onAuthStateChanged(fbAuth, async (user) => {
+                            if (user) {
+                                currentUserId.value = user.uid;
+                                authError.value = '';
+                            } else {
+                                try {
+                                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                        await signInWithCustomToken(fbAuth, __initial_auth_token);
+                                    } else {
+                                        await signInAnonymously(fbAuth);
+                                    }
+                                } catch (error) {
+                                    console.error("Error during sign-in (Vue):", error);
+                                    authError.value = t('formErrors.authInitError');
+                                }
+                            }
+                        }, (error) => {
+                            console.error("Auth state change error (Vue):", error);
+                            authError.value = t('formErrors.authInitError'); // Simplified error
+                        });
+
+                    } catch (error) {
+                        console.error("Firebase initialization error (Vue):", error);
+                        authError.value = 'Critical system error: Could not connect to services. Please try again later or contact support.'; // This one might not be translatable if t() isn't ready
+                    }
+                });
+                
+                const validateDeliveryDate = () => {
+                    const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                    if (personalData.deliveryDate && !datePattern.test(personalData.deliveryDate)) {
+                        deliveryDateError.value = t('personalData.dateFormatError');
+                    } else if (personalData.deliveryDate) {
+                        const parts = personalData.deliveryDate.split("/");
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10);
+                        if (month < 1 || month > 12 || day < 1 || day > 31) { 
+                            deliveryDateError.value = t('personalData.dateInvalidError');
+                        } else {
+                            deliveryDateError.value = "";
+                        }
+                    } else {
+                        deliveryDateError.value = ""; 
+                    }
+                };
+
+
+                const handleQ10Change = (questionId, value) => {
+                    if (questionId === 'q10') {
+                        showQ10Warning.value = value >= 1 && value <= 3;
+                    }
+                };
+
+                const handleSubmit = async () => {
+                    if (!currentUserId.value) {
+                        alert(t('formErrors.authInitError'));
+                        return;
+                    }
+                    if (deliveryDateError.value) {
+                        alert(t('formErrors.generalFormError'));
+                        return;
+                    }
+
+                    generalLoading.value = true;
+                    let currentTotal = 0;
+                    let currentQ10Score = 0;
+                    const collectedAnswers = [];
+
+                    questions.value.forEach(q => {
+                        const value = Number(answers[q.id]);
+                        currentTotal += value;
+                        if (q.isCritical) {
+                            currentQ10Score = value;
+                        }
+                        const selectedOption = q.options.find(opt => opt.value === value);
+                        collectedAnswers.push({
+                            questionId: q.id,
+                            questionTextKey: q.textKey, // Store key for potential re-translation if needed
+                            answerValue: value,
+                            answerTextKey: selectedOption ? selectedOption.textKey : 'N/A',
+                        });
+                    });
+
+                    totalScore.value = currentTotal;
+                    q10Score.value = currentQ10Score;
+                    
+                    updateScoreInterpretation();
+                    showResultsModal.value = true;
+
+                    const submissionData = {
+                        userId: currentUserId.value,
+                        appId: appId,
+                        submissionTimestamp: serverTimestamp(),
+                        personalData: { ...personalData },
+                        answers: collectedAnswers, // Storing keys now
+                        q10Score: q10Score.value,
+                        totalScore: totalScore.value,
+                        languageAtSubmission: currentLanguage.value // Good to record this
+                    };
+
+                    try {
+                        const docRef = await addDoc(collection(fbDb, `artifacts/${appId}/users/${currentUserId.value}/epdsSubmissions`), submissionData);
+                        console.log("Initial submission data saved with ID (Vue): ", docRef.id);
+                    } catch (e) {
+                        console.error("Error adding initial document (Vue): ", e);
+                        scoreInterpretationHTML.value += `<p class="critical-emergency">${t('resultsModal.saveError') || 'Error saving results.'}</p>`;
+                    } finally {
+                        generalLoading.value = false;
+                    }
+                };
+
+                const updateScoreInterpretation = () => {
+                    let interpretationKey = "";
+                    if (totalScore.value >= 0 && totalScore.value <= 9) {
+                        interpretationKey = "scoreInterpretation.low";
+                    } else if (totalScore.value >= 10 && totalScore.value <= 12) {
+                        interpretationKey = "scoreInterpretation.medium";
+                    } else if (totalScore.value >= 13) {
+                        interpretationKey = "scoreInterpretation.high";
+                    }
+                    scoreInterpretationHTML.value = `<p class="mb-2">${t(interpretationKey)}</p>`;
+                    item10SpecificWarning.value = q10Score.value >= 1 && q10Score.value <= 3;
+                    showGeminiFeature.value = totalScore.value <= 12 && q10Score.value === 0;
+                     if(showGeminiFeature.value) {
+                        geminiResultText.value = '';
+                        geminiError.value = '';
+                    }
+                };
+
+                const getGentleTips = async () => {
+                    geminiLoading.value = true;
+                    geminiResultText.value = '';
+                    geminiError.value = '';
+
+                    // Gemini prompt remains in English for simplicity in this version
+                    const prompt = `You are a compassionate assistant. A new mother has just completed a well-being questionnaire. Her score suggests she might be experiencing some mild to moderate distress but is not in a high-risk category. Generate the following for her, in a gentle and supportive tone, IN ENGLISH:
+1.  Three short, encouraging affirmations. Each affirmation should be on a new line.
+2.  Two simple, general, non-medical coping strategies for managing everyday stress. Each strategy should be on a new line.
+Frame this as general suggestions, not medical advice. Start the response with 'Here are some gentle thoughts and tips that might be helpful:' and end with 'Remember, these are just general suggestions. If you continue to feel overwhelmed, please reach out to your healthcare provider or a trusted support person.' Ensure the output is plain text.`;
+
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                    const payload = { contents: chatHistory };
+
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (!response.ok) {
+                            const errorBody = await response.text();
+                            throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
+                        }
+                        const result = await response.json();
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            geminiResultText.value = result.candidates[0].content.parts[0].text;
+                        } else {
+                            console.error('Unexpected response structure from Gemini API (Vue):', result);
+                            geminiError.value = t('geminiErrors.unexpectedResponse');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching from Gemini API (Vue):', error);
+                        geminiError.value = t('geminiErrors.fetchError', { error: error.message });
+                    } finally {
+                        geminiLoading.value = false;
+                    }
+                };
+
+                const confirmBooking = async () => {
+                    generalLoading.value = true;
+                    let bookingDetailsToSave = {};
+                    const selectedLocationKey = bookingData.location; // e.g., "CN", "Dr. Pan"
+                    let selectedLocationText = "";
+
+                    if (selectedLocationKey) {
+                         // Find the translated text for the location
+                        const locationMap = {
+                            "CN": t('booking.locations.cn'),
+                            "HV": t('booking.locations.hv'),
+                            "TH": t('booking.locations.th'),
+                            "Dr. Pan": t('booking.locations.drPan'),
+                            "Dr. Liao": t('booking.locations.drLiao')
+                        };
+                        selectedLocationText = locationMap[selectedLocationKey] || selectedLocationKey;
+
+                        const routingMap = {
+                            "CN": "MHC-CN email", "HV": "MHC-HV email", "TH": "MHC-TH email",
+                            "Dr. Pan": "MHC-TH email (for Dr. Pan)", "Dr. Liao": "MHC-CN email (for Dr. Liao)"
+                        };
+                        thankYouMessageHTML.value = t('thankYouModal.bookingMade', { location: selectedLocationText, routing: routingMap[selectedLocationKey] || 'Selected option' });
+                        bookingDetailsToSave = {
+                            bookingRequested: true,
+                            bookingChoice: selectedLocationKey, // Store the key
+                            bookingChoiceText_en: enMessages.booking.locations[selectedLocationKey.toLowerCase()] || selectedLocationKey, // Store English text for consistency in DB if needed
+                            bookingChoiceText_zh: zhMessages.booking.locations[selectedLocationKey.toLowerCase()] || selectedLocationKey, // Store Chinese text
+                            bookingRouting: routingMap[selectedLocationKey] || 'N/A'
+                        };
+                    } else {
+                        thankYouMessageHTML.value = t('thankYouModal.bookingNotMade');
+                        bookingDetailsToSave = { bookingRequested: false };
+                    }
+                    
+                    try {
+                        const bookingDataForFirestore = {
+                            userId: currentUserId.value,
+                            appId: appId,
+                            relatedSubmissionScore: totalScore.value,
+                            bookingDetails: bookingDetailsToSave,
+                            timestamp: serverTimestamp(),
+                            languageAtBooking: currentLanguage.value
+                        };
+                        await addDoc(collection(fbDb, `artifacts/${appId}/users/${currentUserId.value}/bookingChoices`), bookingDataForFirestore);
+                    } catch (e) {
+                        console.error("Error saving booking choice (Vue): ", e);
+                        thankYouMessageHTML.value += `<br><br><p class="critical-emergency">${t('thankYouModal.bookingSaveError') || 'Could not save booking preference.'}</p>`;
+                    }
+
+                    showResultsModal.value = false;
+                    showThankYouModal.value = true;
+                    generalLoading.value = false;
+                };
+
+                const closeThankYouModal = () => {
+                    showThankYouModal.value = false;
+                    Object.assign(personalData, { age: null, mentalProblemHistory: '', previousPregnancies: null, deliveryDate: '' });
+                    Object.keys(answers).forEach(key => answers[key] = null); 
+                    totalScore.value = 0;
+                    q10Score.value = 0;
+                    showQ10Warning.value = false;
+                    geminiResultText.value = '';
+                    geminiError.value = '';
+                    bookingData.location = '';
+                };
+                
+                questions.value.forEach(q => {
+                    answers[q.id] = null; 
+                });
+
+
+                return {
+                    personalData, deliveryDateError, validateDeliveryDate, answers, questions,
+                    showQ10Warning, handleQ10Change, handleSubmit, showResultsModal, totalScore,
+                    scoreInterpretationHTML, item10SpecificWarning, bookingData, confirmBooking,
+                    showThankYouModal, thankYouMessageHTML, closeThankYouModal, currentUserId,
+                    authError, generalLoading, showGeminiFeature, geminiLoading, geminiResultText,
+                    geminiError, getGentleTips,
+                    // i18n
+                    t, setLanguage, currentLanguage
+                };
+            }
+        };
+
+        createApp(App).mount('#app');
+    </script>
+</body>
+</html>
