@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPDS Questionnaire | nathan MHC</title>
+    <title>EPDS Questionnaire | Nathan MHC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -133,7 +133,6 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        /* Removed bilingual-text class styling as text will be handled by i18n */
         .radio-option-selected {
             background-color: #e0f0f3;
             border-color: #005A70;
@@ -296,7 +295,8 @@
                         <div v-if="geminiLoading" class="loader"></div>
                         <div v-if="geminiResultText" class="gemini-content">
                             <h4>{{ t('gemini.title') }}</h4>
-                            <p>{{ geminiResultText }}</p> <p class="text-xs mt-3">
+                            <p>{{ geminiResultText }}</p> 
+                            <p class="text-xs mt-3">
                                 <strong>{{ t('gemini.disclaimerTitle') }}</strong> {{ t('gemini.disclaimerText') }}
                             </p>
                         </div>
@@ -340,16 +340,11 @@
                     <button @click="closeThankYouModal" class="btn-primary w-full mt-6">{{ t('buttons.close') }}</button>
                 </div>
             </div>
-             <div v-if="authError" class="critical-emergency p-4 text-center fixed top-0 left-0 w-full z-50">
-                {{ authError }}
-            </div>
-
+            
             <footer class="text-center mt-12 py-6 border-t border-gray-300">
                 <p class="text-sm text-gray-500">
                    {{ t('footer.references') }}
                 </p>
-                 <p v-if="currentUserId" class="text-xs text-gray-400 mt-2">{{ t('footer.userId') }}: {{ currentUserId }}</p>
-                 <p v-else-if="!authError" class="text-xs text-gray-400 mt-2">{{ t('footer.initializingUser') }}</p>
             </footer>
         </div>
     </div>
@@ -357,15 +352,9 @@
     <script type="module">
         const { createApp, ref, reactive, onMounted, computed } = Vue;
 
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         // --- i18n Messages ---
-        // In a real app, these would be in separate en.json and zh.json files
         const enMessages = {
-            appTitleShort: "nathan MHC",
+            appTitleShort: "Nathan MHC",
             epdsTitle: "Edinburgh Postnatal Depression Scale (EPDS)",
             intro: {
                 line1_pt1: "Edinburgh Postnatal Depression Scale is a reliable & effective screening tool to assess new mothers emotional adjustment after delivery. Since you are either pregnant or have recently had a baby, we want to know how you feel. Please select the answer that comes closest to how you have been feeling",
@@ -420,7 +409,8 @@
             resultsModal: {
                 title: "Your EPDS Score",
                 item10WarningTitle: "VERY IMPORTANT (Item 10):",
-                item10WarningText: "Because of your answer to the question about thoughts of self-harm, it is crucial that you seek further evaluation as soon as possible to ensure your safety and the safety of your baby. Please contact your healthcare provider or go to the nearest emergency room."
+                item10WarningText: "Because of your answer to the question about thoughts of self-harm, it is crucial that you seek further evaluation as soon as possible to ensure your safety and the safety of your baby. Please contact your healthcare provider or go to the nearest emergency room.",
+                saveError: "Error saving your results. Please try again or contact support."
             },
             gemini: {
                 title: "Gentle Encouragement & Tips",
@@ -442,7 +432,8 @@
             thankYouModal: {
                 title: "Thank You",
                 bookingMade: "Thank you. Your EPDS score has been recorded. A booking request for <strong>{location}</strong> has been noted. Our team will be in touch if further action is required based on your results and request.<br><br>Routing for request: {routing}",
-                bookingNotMade: "Thank you. Your EPDS score has been recorded. Remember, the EPDS indicates how you felt during the previous week, and it may be useful to repeat the scale after two weeks. If something doesn’t seem right, call our centre or your health care provider regardless of your score."
+                bookingNotMade: "Thank you. Your EPDS score has been recorded. Remember, the EPDS indicates how you felt during the previous week, and it may be useful to repeat the scale after two weeks. If something doesn’t seem right, call our centre or your health care provider regardless of your score.",
+                bookingSaveError: "Could not save booking preference. Please contact support."
             },
             contactInfo: {
                 title: "Contact Information",
@@ -453,15 +444,14 @@
             },
             footer: {
                 references: "References: Cox, J.L., Holden, J.M. and Sagovsky, R. (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry, 150, 782-786. Full list of references available upon request.",
-                userId: "User ID",
-                initializingUser: "Initializing user..."
+                userId: "User ID", // Will be removed visually
+                initializingUser: "Initializing user..." // Will be removed visually
             },
             scoreInterpretation: {
                 low: "Scores in this range may indicate the presence of some symptoms of distress that may be short-lived and are less likely to interfere with day to day ability to function at home or at work. However if these symptoms have persisted more than a week or two further enquiry is warranted.",
                 medium: "Scores within this range indicate presence of symptoms of distress that may be discomforting. Repeat the EPDS in 2 weeks’ time and continue monitoring progress regularly. If the scores increase to above 12 assess further and consider referral as needed.",
                 high: "Scores above 12 require further assessment and appropriate management as the likelihood of depression is high. Referral to a psychiatrist/psychologist may be necessary."
             },
-            // Question Keys
             questions: {
                 q_example: { text: "I have felt happy", opt0: "Yes, all of the time", opt1: "Yes, most of the time", opt2: "No, not very often", opt3: "No, not at all" },
                 q1: { text: "I have been able to laugh and see the funny side of things", opt0: "As much as I always have", opt1: "Not quite so much now", opt2: "Definitely not so much now", opt3: "Not at all" },
@@ -480,13 +470,13 @@
                 unexpectedResponse: "Sorry, couldn't retrieve tips at this moment. Please try again later."
             },
             formErrors: {
-                authInitError: "Authentication is still initializing or failed. Please wait or refresh.",
+                authInitError: "Authentication is still initializing or failed. Please wait or refresh.", // Will be unused
                 generalFormError: "Please correct the errors in the form."
             }
         };
 
         const zhMessages = {
-            appTitleShort: "養和醫療",
+            appTitleShort: "Nathan醫療",
             epdsTitle: "愛丁堡產後抑鬱量表",
             intro: {
                 line1_pt1: "愛丁堡產後憂鬱量表是一個可靠且有效的篩查工具，用於評估新任媽媽在分娩後的情緒調整。由於您正處於懷孕階段或最近剛生完寶寶，我們希望了解您的感受。請於選擇答案時提供不僅僅是您今天的感受，而是最接近您在",
@@ -541,7 +531,8 @@
             resultsModal: {
                 title: "您的EPDS分數",
                 item10WarningTitle: "非常重要（第10項）：",
-                item10WarningText: "由於您對有關自我傷害想法問題的回答，請您盡快接受進一步評估，以確保您自己和寶寶的安全。請聯絡您的醫療服務提供者或前往最近的急症室。"
+                item10WarningText: "由於您對有關自我傷害想法問題的回答，請您盡快接受進一步評估，以確保您自己和寶寶的安全。請聯絡您的醫療服務提供者或前往最近的急症室。",
+                saveError: "儲存結果時出錯。請重試或聯絡支援人員。"
             },
             gemini: {
                 title: "溫馨鼓勵与提示",
@@ -563,7 +554,8 @@
             thankYouModal: {
                 title: "謝謝您",
                 bookingMade: "謝謝您。您的EPDS分數已被記錄。有關<strong>{location}</strong>的預約請求已被記錄。如果根據您的結果和請求需要進一步行動，我們的團隊將與您聯繫。<br><br>請求將轉介至：{routing}",
-                bookingNotMade: "謝謝您。您的EPDS分數已被記錄。請記住，此EPDS量表顯示媽媽在過去一周的感受，兩周後重複使用此量表可能會有所幫助。如果您感覺有任何不妥，無論您的得分如何，都請聯絡我們的中心或您的醫生。"
+                bookingNotMade: "謝謝您。您的EPDS分數已被記錄。請記住，此EPDS量表顯示媽媽在過去一周的感受，兩周後重複使用此量表可能會有所幫助。如果您感覺有任何不妥，無論您的得分如何，都請聯絡我們的中心或您的醫生。",
+                bookingSaveError: "無法儲存預約偏好。請聯絡支援人員。"
             },
             contactInfo: {
                 title: "聯絡方式",
@@ -574,15 +566,15 @@
             },
             footer: {
                 references: "參考文獻：Cox, J.L., Holden, J.M. and Sagovsky, R. (1987)。產後抑鬱症的檢測：10項愛丁堡產後抑鬱量表的發展。《英國精神醫學雜誌》，150，782-786。完整的參考文獻列表可應要求提供。",
-                userId: "用戶ID",
-                initializingUser: "正在初始化用戶..."
+                userId: "用戶ID", // Will be removed visually
+                initializingUser: "正在初始化用戶..." // Will be removed visually
             },
             scoreInterpretation: {
                 low: "得分 0-9 ：這個範圍的得分可能表示存在一些短暫的困擾症狀，並且不太可能影響在家或工作時的日常功能。然而，如果這些症狀持續超過一到兩週，則需要進一步尋求協助。",
                 medium: "得分10-12：這個範圍的得分表示存在可能令人不適的困擾症狀。請在兩週後重複進行EPDS，並定期監測進展。如果得分上升到12以上，則需要進一步評估並考慮轉介專業人士。",
                 high: "得分≥13：因為抑鬱症的可能性較高，得分超過12需要進一步評估和適切管理。可能需要轉介精神科醫生或心理學家。"
             },
-            questions: { // Note: Values for options are universal, text keys are translated
+            questions: { 
                 q_example: { text: "我感到愉快", opt0: "所有時候這樣", opt1: "大部分時候這樣", opt2: "不經常這樣", opt3: "一點也沒有" },
                 q1: { text: "我能看到事情有趣的一面，並笑得開心", opt0: "同以前一樣", opt1: "沒有以前那麼多", opt2: "肯定比以前少", opt3: "完全不能" },
                 q2: { text: "我欣然期待未來的一切", opt0: "同以前一樣", opt1: "沒有以前那麼多", opt2: "肯定比以前少", opt3: "完全不能" },
@@ -600,7 +592,7 @@
                 unexpectedResponse: "抱歉，暫時無法獲取提示。請稍後再試。"
             },
             formErrors: {
-                authInitError: "認證仍在初始化或失敗。請稍候或刷新頁面。",
+                authInitError: "認證仍在初始化或失敗。請稍候或刷新頁面。", // Will be unused
                 generalFormError: "請修正表格中的錯誤。"
             }
         };
@@ -618,15 +610,14 @@
                 const t = (key, namedArgs = {}) => {
                     let translation = key.split('.').reduce((o, i) => {
                         if (o && typeof o === 'object' && i in o) return o[i];
-                        return null; // Key not found
+                        return null; 
                     }, messages.value);
 
                     if (translation === null) {
                         console.warn(`Translation key "${key}" not found for language "${currentLanguage.value}".`);
-                        return key; // Return the key itself if not found
+                        return key; 
                     }
 
-                    // Simple interpolation for named arguments like {location}
                     if (typeof translation === 'string' && Object.keys(namedArgs).length > 0) {
                         Object.keys(namedArgs).forEach(argKey => {
                             translation = translation.replace(new RegExp(`{${argKey}}`, 'g'), namedArgs[argKey]);
@@ -639,16 +630,6 @@
                     currentLanguage.value = lang;
                     localStorage.setItem('epdsLang', lang);
                 };
-
-
-                // Firebase State
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-epds-vue-app';
-                let fbApp;
-                let fbAuth;
-                let fbDb;
-                const currentUserId = ref(null);
-                const authError = ref('');
 
                 // Form State
                 const personalData = reactive({
@@ -693,41 +674,6 @@
                 const geminiLoading = ref(false);
                 const geminiResultText = ref('');
                 const geminiError = ref('');
-
-                onMounted(async () => {
-                    try {
-                        fbApp = initializeApp(firebaseConfig);
-                        fbAuth = getAuth(fbApp);
-                        fbDb = getFirestore(fbApp);
-                        setLogLevel('debug');
-                        console.log("Firebase initialized successfully (Vue).");
-
-                        onAuthStateChanged(fbAuth, async (user) => {
-                            if (user) {
-                                currentUserId.value = user.uid;
-                                authError.value = '';
-                            } else {
-                                try {
-                                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                        await signInWithCustomToken(fbAuth, __initial_auth_token);
-                                    } else {
-                                        await signInAnonymously(fbAuth);
-                                    }
-                                } catch (error) {
-                                    console.error("Error during sign-in (Vue):", error);
-                                    authError.value = t('formErrors.authInitError');
-                                }
-                            }
-                        }, (error) => {
-                            console.error("Auth state change error (Vue):", error);
-                            authError.value = t('formErrors.authInitError'); // Simplified error
-                        });
-
-                    } catch (error) {
-                        console.error("Firebase initialization error (Vue):", error);
-                        authError.value = 'Critical system error: Could not connect to services. Please try again later or contact support.'; // This one might not be translatable if t() isn't ready
-                    }
-                });
                 
                 const validateDeliveryDate = () => {
                     const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
@@ -747,7 +693,6 @@
                     }
                 };
 
-
                 const handleQ10Change = (questionId, value) => {
                     if (questionId === 'q10') {
                         showQ10Warning.value = value >= 1 && value <= 3;
@@ -755,10 +700,6 @@
                 };
 
                 const handleSubmit = async () => {
-                    if (!currentUserId.value) {
-                        alert(t('formErrors.authInitError'));
-                        return;
-                    }
                     if (deliveryDateError.value) {
                         alert(t('formErrors.generalFormError'));
                         return;
@@ -767,21 +708,13 @@
                     generalLoading.value = true;
                     let currentTotal = 0;
                     let currentQ10Score = 0;
-                    const collectedAnswers = [];
-
+                    
                     questions.value.forEach(q => {
                         const value = Number(answers[q.id]);
                         currentTotal += value;
                         if (q.isCritical) {
                             currentQ10Score = value;
                         }
-                        const selectedOption = q.options.find(opt => opt.value === value);
-                        collectedAnswers.push({
-                            questionId: q.id,
-                            questionTextKey: q.textKey, // Store key for potential re-translation if needed
-                            answerValue: value,
-                            answerTextKey: selectedOption ? selectedOption.textKey : 'N/A',
-                        });
                     });
 
                     totalScore.value = currentTotal;
@@ -789,27 +722,15 @@
                     
                     updateScoreInterpretation();
                     showResultsModal.value = true;
-
-                    const submissionData = {
-                        userId: currentUserId.value,
-                        appId: appId,
-                        submissionTimestamp: serverTimestamp(),
-                        personalData: { ...personalData },
-                        answers: collectedAnswers, // Storing keys now
-                        q10Score: q10Score.value,
-                        totalScore: totalScore.value,
-                        languageAtSubmission: currentLanguage.value // Good to record this
-                    };
-
-                    try {
-                        const docRef = await addDoc(collection(fbDb, `artifacts/${appId}/users/${currentUserId.value}/epdsSubmissions`), submissionData);
-                        console.log("Initial submission data saved with ID (Vue): ", docRef.id);
-                    } catch (e) {
-                        console.error("Error adding initial document (Vue): ", e);
-                        scoreInterpretationHTML.value += `<p class="critical-emergency">${t('resultsModal.saveError') || 'Error saving results.'}</p>`;
-                    } finally {
-                        generalLoading.value = false;
-                    }
+                    generalLoading.value = false;
+                    
+                    // Log data to console instead of Firebase
+                    console.log("Form Submitted (No Firebase):");
+                    console.log("Personal Data:", { ...personalData });
+                    console.log("Answers:", { ...answers });
+                    console.log("Total Score:", totalScore.value);
+                    console.log("Q10 Score:", q10Score.value);
+                    console.log("Language at Submission:", currentLanguage.value);
                 };
 
                 const updateScoreInterpretation = () => {
@@ -834,8 +755,6 @@
                     geminiLoading.value = true;
                     geminiResultText.value = '';
                     geminiError.value = '';
-
-                    // Gemini prompt remains in English for simplicity in this version
                     const prompt = `You are a compassionate assistant. A new mother has just completed a well-being questionnaire. Her score suggests she might be experiencing some mild to moderate distress but is not in a high-risk category. Generate the following for her, in a gentle and supportive tone, IN ENGLISH:
 1.  Three short, encouraging affirmations. Each affirmation should be on a new line.
 2.  Two simple, general, non-medical coping strategies for managing everyday stress. Each strategy should be on a new line.
@@ -876,52 +795,31 @@ Frame this as general suggestions, not medical advice. Start the response with '
 
                 const confirmBooking = async () => {
                     generalLoading.value = true;
-                    let bookingDetailsToSave = {};
-                    const selectedLocationKey = bookingData.location; // e.g., "CN", "Dr. Pan"
+                    const selectedLocationKey = bookingData.location; 
                     let selectedLocationText = "";
 
                     if (selectedLocationKey) {
-                         // Find the translated text for the location
                         const locationMap = {
-                            "CN": t('booking.locations.cn'),
-                            "HV": t('booking.locations.hv'),
-                            "TH": t('booking.locations.th'),
-                            "Dr. Pan": t('booking.locations.drPan'),
+                            "CN": t('booking.locations.cn'), "HV": t('booking.locations.hv'),
+                            "TH": t('booking.locations.th'), "Dr. Pan": t('booking.locations.drPan'),
                             "Dr. Liao": t('booking.locations.drLiao')
                         };
                         selectedLocationText = locationMap[selectedLocationKey] || selectedLocationKey;
-
                         const routingMap = {
                             "CN": "MHC-CN email", "HV": "MHC-HV email", "TH": "MHC-TH email",
                             "Dr. Pan": "MHC-TH email (for Dr. Pan)", "Dr. Liao": "MHC-CN email (for Dr. Liao)"
                         };
                         thankYouMessageHTML.value = t('thankYouModal.bookingMade', { location: selectedLocationText, routing: routingMap[selectedLocationKey] || 'Selected option' });
-                        bookingDetailsToSave = {
-                            bookingRequested: true,
-                            bookingChoice: selectedLocationKey, // Store the key
-                            bookingChoiceText_en: enMessages.booking.locations[selectedLocationKey.toLowerCase()] || selectedLocationKey, // Store English text for consistency in DB if needed
-                            bookingChoiceText_zh: zhMessages.booking.locations[selectedLocationKey.toLowerCase()] || selectedLocationKey, // Store Chinese text
-                            bookingRouting: routingMap[selectedLocationKey] || 'N/A'
-                        };
                     } else {
                         thankYouMessageHTML.value = t('thankYouModal.bookingNotMade');
-                        bookingDetailsToSave = { bookingRequested: false };
                     }
                     
-                    try {
-                        const bookingDataForFirestore = {
-                            userId: currentUserId.value,
-                            appId: appId,
-                            relatedSubmissionScore: totalScore.value,
-                            bookingDetails: bookingDetailsToSave,
-                            timestamp: serverTimestamp(),
-                            languageAtBooking: currentLanguage.value
-                        };
-                        await addDoc(collection(fbDb, `artifacts/${appId}/users/${currentUserId.value}/bookingChoices`), bookingDataForFirestore);
-                    } catch (e) {
-                        console.error("Error saving booking choice (Vue): ", e);
-                        thankYouMessageHTML.value += `<br><br><p class="critical-emergency">${t('thankYouModal.bookingSaveError') || 'Could not save booking preference.'}</p>`;
-                    }
+                    // Log booking choice to console
+                    console.log("Booking Choice (No Firebase):", {
+                        locationKey: selectedLocationKey,
+                        locationText: selectedLocationText,
+                        languageAtBooking: currentLanguage.value
+                    });
 
                     showResultsModal.value = false;
                     showThankYouModal.value = true;
@@ -944,15 +842,13 @@ Frame this as general suggestions, not medical advice. Start the response with '
                     answers[q.id] = null; 
                 });
 
-
                 return {
                     personalData, deliveryDateError, validateDeliveryDate, answers, questions,
                     showQ10Warning, handleQ10Change, handleSubmit, showResultsModal, totalScore,
                     scoreInterpretationHTML, item10SpecificWarning, bookingData, confirmBooking,
-                    showThankYouModal, thankYouMessageHTML, closeThankYouModal, currentUserId,
-                    authError, generalLoading, showGeminiFeature, geminiLoading, geminiResultText,
+                    showThankYouModal, thankYouMessageHTML, closeThankYouModal, 
+                    generalLoading, showGeminiFeature, geminiLoading, geminiResultText,
                     geminiError, getGentleTips,
-                    // i18n
                     t, setLanguage, currentLanguage
                 };
             }
