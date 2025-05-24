@@ -1,0 +1,118 @@
+{
+    "appTitleShort": "Nathan MHC",
+    "epdsTitle": "Edinburgh Postnatal Depression Scale (EPDS)",
+    "intro": {
+        "line1_pt1": "Edinburgh Postnatal Depression Scale is a reliable & effective screening tool to assess new mothers emotional adjustment after delivery. Since you are either pregnant or have recently had a baby, we want to know how you feel. Please select the answer that comes closest to how you have been feeling",
+        "past7Days": "IN THE PAST 7 DAYS",
+        "line1_pt2": "—not just how you feel today. Complete all 10 items and find your score after submission of the form. Most mothers can easily complete the scale in less than five minutes."
+    },
+    "importantWarning": {
+        "title": "Important:",
+        "text": "EPDS is a screening test, not a medical diagnosis tool. A careful clinical evaluation by a health care professional is needed to confirm a diagnosis and establish a treatment plan. The scale indicates how the mother felt during the previous week, and it may be useful to repeat the scale after two weeks. If something doesn’t seem right, call our centre or your health care provider regardless of your score."
+    },
+    "urgentWarning": {
+        "title": "URGENT:",
+        "text": "If you have had ANY thoughts of harming yourself or your baby, or you are having hallucinations, please GO TO YOUR NEAREST HOSPITAL AUTHORITY HOSPITAL EMERGENCY ROOM IMMEDIATELY.",
+        "titleReminder": "REMINDER - URGENT:"
+    },
+    "additionalResources": {
+        "title": "Additional Resources",
+        "drPan": "Dr. Pan 2024 October metroradio audio file",
+        "drLiao": "Dr. Liao video on EPDS"
+    },
+    "personalData": {
+        "title": "Personal Data",
+        "age": "Age",
+        "mentalHistory": "Do you have a history of depression or other mental problem?",
+        "select": "Select",
+        "yes": "Yes",
+        "no": "No",
+        "prevPregnancies": "Number of pregnancies before",
+        "deliveryDate": "Date of delivery this time",
+        "dateFormat": "DD/MM/YYYY",
+        "dateFormatHelp": "Please use DD/MM/YYYY format.",
+        "dateFormatError": "Please use DD/MM/YYYY format.",
+        "dateInvalidError": "Invalid date."
+    },
+    "questionnaire": {
+        "title": "EPDS Questionnaire",
+        "exampleIntro": "Below is an example",
+        "exampleQuestion": "Question",
+        "exampleExplanation": "This would mean: “I have felt happy most of the time” in the past week. Please complete the other questions in the same way.",
+        "instruction": "In the Past 7 days (including today),"
+    },
+    "q10Warning": {
+        "title": "Regarding your answer to question 10:",
+        "text": "Please contact your health care provider immediately regardless of your final score. Your well-being is very important."
+    },
+    "buttons": {
+        "submitScore": "Submit & See Score",
+        "getGentleTips": "Get Gentle Encouragement & Tips",
+        "confirmFinish": "Confirm Choice & Finish",
+        "close": "Close"
+    },
+    "resultsModal": {
+        "title": "Your EPDS Score",
+        "item10WarningTitle": "VERY IMPORTANT (Item 10):",
+        "item10WarningText": "Because of your answer to the question about thoughts of self-harm, it is crucial that you seek further evaluation as soon as possible to ensure your safety and the safety of your baby. Please contact your healthcare provider or go to the nearest emergency room.",
+        "saveError": "Error saving your results. Please try again or contact support."
+    },
+    "gemini": {
+        "title": "Gentle Encouragement & Tips",
+        "disclaimerTitle": "Disclaimer:",
+        "disclaimerText": "This information is AI-generated and for general informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition."
+    },
+    "booking": {
+        "title": "Would you like to send a booking request to MHC?",
+        "selectLocation": "Select Doctor/Location",
+        "noThanks": "No, thank you",
+        "locations": {
+            "cn": "CN / Central",
+            "hv": "HV / Happy Valley",
+            "th": "TH / Tai Koo",
+            "drPan": "Dr. Pan",
+            "drLiao": "Dr. Liao"
+        }
+    },
+    "thankYouModal": {
+        "title": "Thank You",
+        "bookingMade": "Thank you. Your EPDS score has been recorded. A booking request for <strong>{location}</strong> has been noted. Our team will be in touch if further action is required based on your results and request.<br><br>Routing for request: {routing}",
+        "bookingNotMade": "Thank you. Your EPDS score has been recorded. Remember, the EPDS indicates how you felt during the previous week, and it may be useful to repeat the scale after two weeks. If something doesn’t seem right, call our centre or your health care provider regardless of your score.",
+        "bookingSaveError": "Could not save booking preference. Please contact support."
+    },
+    "contactInfo": {
+        "title": "Contact Information",
+        "cn": { "name": "Central (CN)", "details": "Address_CN, Tel_CN, Fax_CN, Email_CN, WhatsApp_CN" },
+        "hv": { "name": "Happy Valley (HV)", "details": "Address_HV, Tel_HV, Fax_HV, Email_HV, WhatsApp_HV" },
+        "th": { "name": "Tai Koo (TH)", "details": "Address_TH, Tel_TH, Fax_TH, Email_TH, WhatsApp_TH" },
+        "note": "(Note: Please replace Address_XX, Tel_XX etc. with actual contact details)"
+    },
+    "footer": {
+        "references": "References: Cox, J.L., Holden, J.M. and Sagovsky, R. (1987). Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry, 150, 782-786. Full list of references available upon request."
+    },
+    "scoreInterpretation": {
+        "low": "Scores in this range may indicate the presence of some symptoms of distress that may be short-lived and are less likely to interfere with day to day ability to function at home or at work. However if these symptoms have persisted more than a week or two further enquiry is warranted.",
+        "medium": "Scores within this range indicate presence of symptoms of distress that may be discomforting. Repeat the EPDS in 2 weeks’ time and continue monitoring progress regularly. If the scores increase to above 12 assess further and consider referral as needed.",
+        "high": "Scores above 12 require further assessment and appropriate management as the likelihood of depression is high. Referral to a psychiatrist/psychologist may be necessary."
+    },
+    "questions": {
+        "q_example": { "text": "I have felt happy", "opt0": "Yes, all of the time", "opt1": "Yes, most of the time", "opt2": "No, not very often", "opt3": "No, not at all" },
+        "q1": { "text": "I have been able to laugh and see the funny side of things", "opt0": "As much as I always have", "opt1": "Not quite so much now", "opt2": "Definitely not so much now", "opt3": "Not at all" },
+        "q2": { "text": "I have looked forward with enjoyment to things", "opt0": "As much as I always have", "opt1": "Not quite so much now", "opt2": "Definitely not so much now", "opt3": "Not at all" },
+        "q3": { "text": "I have blamed myself unnecessarily when things went wrong", "opt0": "No, never", "opt1": "Not very often", "opt2": "Yes, some of the time", "opt3": "Yes, most of the time" },
+        "q4": { "text": "I have felt anxious or worried for no very good reason", "opt0": "No, not at all", "opt1": "Hardly ever", "opt2": "Yes, sometimes", "opt3": "Yes, very often" },
+        "q5": { "text": "I have felt scared or panicky for no very good reason", "opt0": "No, not at all", "opt1": "No, not much", "opt2": "Yes, sometimes", "opt3": "Yes, quite a lot" },
+        "q6": { "text": "Things have been getting on top of me / When things were getting on top of me", "opt0": "I have been coping as well as ever", "opt1": "Most of the time I have coped quite well", "opt2": "Sometimes I was not coping as well as before", "opt3": "Most of the time I was not able to cope at all" },
+        "q7": { "text": "I have been so unhappy that I have had difficulty sleeping", "opt0": "No, not at all", "opt1": "Not very often", "opt2": "Yes, sometimes", "opt3": "Yes, most of the time" },
+        "q8": { "text": "I have felt sad or miserable", "opt0": "No, not at all", "opt1": "Not very often", "opt2": "Yes, sometimes", "opt3": "Yes, most of the time" },
+        "q9": { "text": "I have been so unhappy that I have been crying", "opt0": "No, never", "opt1": "Only occasionally", "opt2": "Yes, sometimes", "opt3": "Yes, most of the time" },
+        "q10": { "text": "I have thought of harming myself", "opt0": "Never", "opt1": "Hardly ever", "opt2": "Sometimes", "opt3": "Yes, quite often" }
+    },
+    "geminiErrors": {
+        "fetchError": "Error fetching tips: {error}. Please try again later.",
+        "unexpectedResponse": "Sorry, couldn't retrieve tips at this moment. Please try again later."
+    },
+    "formErrors": {
+        "generalFormError": "Please correct the errors in the form."
+    }
+}
