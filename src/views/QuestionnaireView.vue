@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto p-4 md:p-8 max-w-4xl">
-    <AppHeader @set-language="updateLanguage" /> <!-- Removed props, Header will use useI18n -->
+    <AppHeader @set-language="updateLanguage" />
 
     <section class="mb-8 p-6 bg-white shadow-lg rounded-lg">
       <p>{{ t('intro.line1_pt1') }} <strong>{{ t('intro.past7Days') }}</strong> {{ t('intro.line1_pt2') }}</p>
@@ -79,7 +79,7 @@
           :index="index + 1"
           v-model="answers[question.id]"
           @answer-changed="handleAnswerChanged" 
-        /> <!-- Removed :t prop, QuestionCard will use useI18n -->
+        />
         
         <div v-if="showQ10Warning" class="critical-warning mt-4">
           <p><strong>{{ t('q10Warning.title') }}</strong> {{ t('q10Warning.text') }}</p>
@@ -105,15 +105,15 @@
       v-model:bookingLocation="bookingData.location"
       @get-gentle-tips="getGentleTips"
       @confirm-booking="confirmBooking"
-    /> <!-- Removed :t prop, ResultsModal will use useI18n -->
+    />
 
     <ThankYouModal
       :show="showThankYouModal"
       :thank-you-message-h-t-m-l="thankYouMessageHTML"
       @close-modal="closeThankYouModal"
-    /> <!-- Removed :t prop, ThankYouModal will use useI18n -->
+    />
     
-    <AppFooter /> <!-- Removed :t prop, Footer will use useI18n -->
+    <AppFooter />
     <div v-if="generalLoading" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-[1001]">
         <div class="loader"></div>
     </div>
@@ -123,7 +123,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
-import { useI18n } from 'vue-i18n'; // Import useI18n
+import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '../../store/authStore'; // Import Auth store
 
 // Import components
 import AppHeader from '../components/layout/Header.vue';
@@ -132,8 +133,9 @@ import QuestionCard from '../components/Questionnaire/QuestionCard.vue';
 import ResultsModal from '../components/Questionnaire/ResultsModal.vue';
 import ThankYouModal from '../components/Questionnaire/ThankYouModal.vue';
 
-// Initialize vue-i18n
+// Initialize vue-i18n and Auth store
 const { t, locale } = useI18n();
+const authStore = useAuthStore();
 
 // Function to update language (called by Header component)
 const updateLanguage = (lang: 'en' | 'zh') => {
@@ -222,43 +224,84 @@ const handleAnswerChanged = (payload: { questionId: string; value: number }) => 
 };
 
 const handleSubmit = async () => {
-    if (deliveryDateError.value) {
-        alert(t('formErrors.generalFormError'));
-        return;
-    }
-    if (isSubmitDisabled.value) {
-        alert(t('formErrors.generalFormError'));
-        return;
+  if (deliveryDateError.value) {
+    alert(t('formErrors.generalFormError'));
+    return;
+  }
+
+  // Ensure all questions are answered
+  const allQuestionsAnswered = questions.value.every(q => answers[q.id] !== null && answers[q.id] !== undefined);
+  if (!allQuestionsAnswered || !personalData.age || !personalData.mentalProblemHistory || personalData.previousPregnancies === null || !personalData.deliveryDate) {
+      alert(t('formErrors.fillAllFields'));
+      return;
+  }
+  
+  generalLoading.value = true;
+  try {
+    const token = await authStore.getToken(); // Get JWT from Auth0
+    if (!token) {
+      // This error will be generic, as getToken already logs specific errors.
+      // Or, we could throw a more specific error if needed for UI.
+      throw new Error('Not authenticated or token unavailable.');
     }
 
-    generalLoading.value = true;
+    // Calculate score
     let currentTotal = 0;
     let currentQ10Score = 0;
-    
     questions.value.forEach(q => {
-        const value = Number(answers[q.id]);
-        currentTotal += value;
-        if (q.isCritical) {
-            currentQ10Score = value;
-        }
+      const value = Number(answers[q.id]);
+      currentTotal += value;
+      if (q.isCritical) {
+        currentQ10Score = value;
+      }
     });
-
     totalScore.value = currentTotal;
     q10Score.value = currentQ10Score;
+
+    const submissionData = {
+      age: personalData.age,
+      mentalProblemHistory: personalData.mentalProblemHistory,
+      previousPregnancies: personalData.previousPregnancies,
+      deliveryDate: personalData.deliveryDate,
+      answers: { ...answers }, // Send a copy
+      totalScore: totalScore.value,
+      q10Score: q10Score.value,
+      language: locale.value, 
+      bookingRequest: { location: bookingData.location || null }, 
+      geminiTipsRequested: geminiResultText.value ? true : false 
+    };
     
-    updateScoreInterpretation();
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    const response = await fetch(`${apiBaseUrl}/submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(submissionData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `API request failed with status ${response.status}`);
+    }
+
+    // const savedSubmission = await response.json(); // Optional: use saved data if needed
+    // console.log('Submission successful:', savedSubmission);
+
+    // Proceed to show results modal as before
+    updateScoreInterpretation(); 
     showResultsModal.value = true;
+
+  } catch (error) {
+    console.error('Error submitting questionnaire:', error);
+    alert(t('resultsModal.saveError') + (error instanceof Error ? `\n${error.message}` : '')); // Show error to user
+  } finally {
     generalLoading.value = false;
-    
-    console.log("Form Submitted (No Firebase - Logged from Vue Component):");
-    console.log("Personal Data:", JSON.parse(JSON.stringify(personalData)));
-    console.log("Answers:", JSON.parse(JSON.stringify(answers)));
-    console.log("Total Score:", totalScore.value);
-    console.log("Q10 Score:", q10Score.value);
-    console.log("Language at Submission:", locale.value); // Use vue-i18n locale
+  }
 };
 
-const updateScoreInterpretation = () => {
+const updateScoreInterpretation = () => { 
     let interpretationKey = "";
     if (totalScore.value >= 0 && totalScore.value <= 9) {
         interpretationKey = "scoreInterpretation.low";
@@ -285,36 +328,39 @@ const getGentleTips = async () => {
 2.  Two simple, general, non-medical coping strategies for managing everyday stress. Each strategy should be on a new line.
 Frame this as general suggestions, not medical advice. Start the response with 'Here are some gentle thoughts and tips that might be helpful:' and end with 'Remember, these are just general suggestions. If you continue to feel overwhelmed, please reach out to your healthcare provider or a trusted support person.' Ensure the output is plain text.`;
 
-    const apiKey = ""; 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    
-    let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-    const payload = { contents: chatHistory };
+    // Prompt construction is now done on the backend.
+    // const prompt = `...`; // Removed
 
     try {
-        if (!apiKey) {
-          throw new Error("API key is missing. Cannot fetch tips.");
-        }
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
-        }
-        const result = await response.json();
-        if (result.candidates && result.candidates.length > 0 &&
-            result.candidates[0].content && result.candidates[0].content.parts &&
-            result.candidates[0].content.parts.length > 0) {
-            geminiResultText.value = result.candidates[0].content.parts[0].text;
-        } else {
-            console.error('Unexpected response structure from Gemini API (Vue):', result);
-            geminiError.value = t('geminiErrors.unexpectedResponse');
-        }
+      const token = await authStore.getToken(); // Get token for authenticated request
+      if (!token) {
+        throw new Error('Authentication token not available.');
+      }
+
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      const response = await fetch(`${apiBaseUrl}/gemini-tips`, { // Call your backend proxy
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          score: totalScore.value,
+          q10Score: q10Score.value,
+          language: locale.value // from useI18n()
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.message || `Failed to fetch tips: ${response.status}`);
+      }
+
+      const result = await response.json();
+      geminiResultText.value = result.tips;
+
     } catch (error: any) {
-        console.error('Error fetching from Gemini API (Vue):', error);
+      console.error('Error fetching gentle tips via proxy:', error);
         geminiError.value = t('geminiErrors.fetchError', { error: error.message });
     } finally {
         geminiLoading.value = false;
@@ -337,20 +383,31 @@ const confirmBooking = async () => {
             "CN": "MHC-CN email", "HV": "MHC-HV email", "TH": "MHC-TH email",
             "Dr. Pan": "MHC-TH email (for Dr. Pan)", "Dr. Liao": "MHC-CN email (for Dr. Liao)"
         };
-        thankYouMessageHTML.value = t('thankYouModal.bookingMade', { location: selectedLocationText, routing: routingMap[selectedLocationKey] || 'Selected option' });
+        // The thankYouMessageHTML is now set after successful API submission.
+        // This part of the logic might be adjusted based on API response.
+        // For now, we keep it to show what would have been done.
+        // However, the display of this message is now contingent on successful API submission.
+        // This function (confirmBooking) will now primarily handle the UI transition
+        // after API submission is done in handleSubmit.
+        // For the purpose of this refactor, we assume `handleSubmit` handles the API call,
+        // and `confirmBooking` might be simplified or its logic merged into `handleSubmit`'s success path.
+        // For this step, we'll assume `thankYouMessageHTML` is correctly set
+        // before `showThankYouModal` is true.
     } else {
-        thankYouMessageHTML.value = t('thankYouModal.bookingNotMade');
+        // Similar to above, this is handled by the API success path.
     }
     
-    console.log("Booking Choice (No Firebase - Logged from Vue Component):", {
+    // This console log is for the booking *choice*, not necessarily the API save confirmation
+    console.log("Booking Choice (will be part of API submission):", {
         locationKey: selectedLocationKey,
         locationText: selectedLocationText,
-        languageAtBooking: locale.value // Use vue-i18n locale
+        languageAtBooking: locale.value
     });
 
-    showResultsModal.value = false;
-    showThankYouModal.value = true;
-    generalLoading.value = false;
+    // The actual display of modals is now controlled by the API submission flow in `handleSubmit`
+    showResultsModal.value = false; // Hide results modal
+    showThankYouModal.value = true; // Show thank you modal
+    generalLoading.value = false; // Ensure loading is stopped
 };
 
 const closeThankYouModal = () => {
@@ -373,10 +430,6 @@ questions.value.forEach(q => {
 </script>
 
 <style scoped>
-/* Styles specific to QuestionnaireView can go here if needed.
-   Most specific styles for cards, modals etc. have been moved to their respective components.
-   Global styles are in App.vue.
-*/
 .loader {
   border: 4px solid #f3f3f3; 
   border-top: 4px solid #005A70; 

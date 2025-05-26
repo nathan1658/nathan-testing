@@ -113,6 +113,65 @@
         "unexpectedResponse": "抱歉，暫時無法獲取提示。請稍後再試。"
     },
     "formErrors": {
-        "generalFormError": "請修正表格中的錯誤。"
+        "generalFormError": "請修正表格中的錯誤。",
+        "fillAllFields": "提交前请填写所有必填字段。"
+    },
+    "login": {
+        "title": "请登录",
+        "button": "登录 / 注册",
+        "loading": "正在处理登录..."
+    },
+    "callback": {
+        "loading": "正在处理身份验证... 请稍候。"
+    },
+    "auth": {
+        "login": "登录",
+        "logout": "登出",
+        "welcome": "欢迎, {name}!",
+        "loading": "验证加载中..."
+    },
+    "admin": {
+        "dashboard": {
+            "title": "管理后台",
+            "welcome": "欢迎来到管理区域。请选择以下选项查看提交记录或统计数据。",
+            "viewSubmissions": "查看提交记录",
+            "viewStatistics": "查看统计数据"
+        },
+        "submissions": {
+            "title": "查看提交记录",
+            "placeholder": "提交记录表格将在此处显示。",
+            "noSubmissions": "未找到任何提交记录。",
+            "table": {
+                "date": "日期",
+                "userId": "用户ID",
+                "age": "年龄",
+                "totalScore": "总分",
+                "q10Score": "Q10得分",
+                "language": "语言"
+            }
+        },
+        "statistics": {
+            "title": "查看统计数据",
+            "placeholder": "统计数据将在此处显示。",
+            "totalSubmissions": "总提交数",
+            "averageScore": "平均分数",
+            "q10CriticalCount": "Q10 > 0 计数",
+            "scoreDistribution": {
+                "title": "分数分布",
+                "low": "低 (0-9)",
+                "medium": "中 (10-12)",
+                "high": "高 (>=13)"
+            },
+            "submissionsByLanguage": {
+                "title": "按语言提交数"
+            }
+        },
+        "loadingData": "正在加载数据...",
+        "errors": {
+            "fetchSubmissionsFailed": "获取提交记录失败。",
+            "fetchStatsFailed": "获取统计数据失败。",
+            "genericApiError": "发生意外错误，请重试。"
+        },
+        "backToDashboard": "返回管理后台主页"
     }
 }

@@ -113,6 +113,65 @@
         "unexpectedResponse": "Sorry, couldn't retrieve tips at this moment. Please try again later."
     },
     "formErrors": {
-        "generalFormError": "Please correct the errors in the form."
+        "generalFormError": "Please correct the errors in the form.",
+        "fillAllFields": "Please fill all required fields before submitting."
+    },
+    "login": {
+        "title": "Please Log In",
+        "button": "Log In / Sign Up",
+        "loading": "Processing login..."
+    },
+    "callback": {
+        "loading": "Processing authentication... Please wait."
+    },
+    "auth": {
+        "login": "Log In",
+        "logout": "Log Out",
+        "welcome": "Welcome, {name}!",
+        "loading": "Auth loading..."
+    },
+    "admin": {
+        "dashboard": {
+            "title": "Admin Dashboard",
+            "welcome": "Welcome to the admin area. Select an option below to view submissions or statistics.",
+            "viewSubmissions": "View Submissions",
+            "viewStatistics": "View Statistics"
+        },
+        "submissions": {
+            "title": "View Submissions",
+            "placeholder": "Submissions table will be displayed here.",
+            "noSubmissions": "No submissions found.",
+            "table": {
+                "date": "Date",
+                "userId": "User ID",
+                "age": "Age",
+                "totalScore": "Total Score",
+                "q10Score": "Q10 Score",
+                "language": "Language"
+            }
+        },
+        "statistics": {
+            "title": "View Statistics",
+            "placeholder": "Statistics will be displayed here.",
+            "totalSubmissions": "Total Submissions",
+            "averageScore": "Average Score",
+            "q10CriticalCount": "Q10 > 0 Count",
+            "scoreDistribution": {
+                "title": "Score Distribution",
+                "low": "Low (0-9)",
+                "medium": "Medium (10-12)",
+                "high": "High (>=13)"
+            },
+            "submissionsByLanguage": {
+                "title": "Submissions by Language"
+            }
+        },
+        "loadingData": "Loading data...",
+        "errors": {
+            "fetchSubmissionsFailed": "Failed to fetch submissions.",
+            "fetchStatsFailed": "Failed to fetch statistics.",
+            "genericApiError": "An unexpected error occurred. Please try again."
+        },
+        "backToDashboard": "Back to Admin Dashboard" 
     }
 }
